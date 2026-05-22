@@ -15,9 +15,9 @@
     --text: #e2e8f0;
     --muted: #64748b;
   }
-
+ 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
+ 
   body {
     background: var(--bg);
     font-family: 'Exo 2', sans-serif;
@@ -25,7 +25,7 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
+ 
   body::before {
     content: '';
     position: fixed;
@@ -37,12 +37,12 @@
     animation: gridMove 20s linear infinite;
     z-index: 0;
   }
-
+ 
   @keyframes gridMove {
     from { transform: translateY(0); }
     to { transform: translateY(60px); }
   }
-
+ 
   body::after {
     content: '';
     position: fixed;
@@ -51,18 +51,13 @@
     pointer-events: none;
     z-index: 1;
   }
-
-  .corner {
-    position: fixed;
-    width: 60px;
-    height: 60px;
-    z-index: 3;
-  }
+ 
+  .corner { position: fixed; width: 60px; height: 60px; z-index: 3; }
   .corner--tl { top: 20px; left: 20px; border-top: 2px solid var(--glow-green); border-left: 2px solid var(--glow-green); }
   .corner--tr { top: 20px; right: 20px; border-top: 2px solid var(--glow-green); border-right: 2px solid var(--glow-green); }
   .corner--bl { bottom: 20px; left: 20px; border-bottom: 2px solid var(--glow-green); border-left: 2px solid var(--glow-green); }
   .corner--br { bottom: 20px; right: 20px; border-bottom: 2px solid var(--glow-green); border-right: 2px solid var(--glow-green); }
-
+ 
   .container {
     position: relative;
     z-index: 2;
@@ -73,7 +68,7 @@
     justify-content: center;
     padding: 40px 24px;
   }
-
+ 
   .back-btn {
     position: fixed;
     top: 28px;
@@ -90,13 +85,13 @@
     z-index: 4;
   }
   .back-btn:hover { color: var(--glow-green); border-color: var(--glow-green); }
-
+ 
   .header {
     text-align: center;
     margin-bottom: 40px;
     animation: fadeDown 0.8s ease both;
   }
-
+ 
   h1 {
     font-family: 'Orbitron', monospace;
     font-size: clamp(1.8rem, 5vw, 3rem);
@@ -106,13 +101,9 @@
     letter-spacing: 0.05em;
     margin-bottom: 10px;
   }
-
-  .subtitle {
-    font-size: 0.9rem;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
+ 
+  .subtitle { font-size: 0.9rem; color: var(--muted); font-weight: 300; }
+ 
   .divider {
     width: 100%;
     max-width: 560px;
@@ -120,7 +111,7 @@
     background: linear-gradient(90deg, transparent, var(--border), transparent);
     margin-bottom: 36px;
   }
-
+ 
   .task-list {
     display: flex;
     flex-direction: column;
@@ -130,7 +121,7 @@
     animation: fadeUp 0.8s 0.3s ease both;
     opacity: 0;
   }
-
+ 
   .task-btn {
     display: flex;
     align-items: center;
@@ -143,15 +134,15 @@
     color: var(--text);
     transition: all 0.25s;
   }
-
+ 
   .task-btn:hover {
     border-color: var(--glow-green);
     box-shadow: 0 0 20px rgba(0,255,136,0.15);
     transform: translateX(4px);
   }
-
+ 
   .task-btn-left { display: flex; align-items: center; gap: 16px; }
-
+ 
   .task-num {
     font-family: 'Orbitron', monospace;
     font-size: 0.65rem;
@@ -163,25 +154,18 @@
     min-width: 44px;
     text-align: center;
   }
-
-  .task-name {
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
-  .task-arrow {
-    color: var(--muted);
-    font-size: 1.1rem;
-    transition: color 0.2s;
-  }
-
+ 
+  .task-info { display: flex; flex-direction: column; gap: 4px; }
+  .task-name { font-size: 0.95rem; font-weight: 600; }
+  .task-desc { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
+ 
+  .task-arrow { color: var(--muted); font-size: 1.1rem; transition: color 0.2s; }
   .task-btn:hover .task-arrow { color: var(--glow-green); }
-
+ 
   @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -189,32 +173,47 @@
 </style>
 </head>
 <body>
-
+ 
 <div class="corner corner--tl"></div>
 <div class="corner corner--tr"></div>
 <div class="corner corner--bl"></div>
 <div class="corner corner--br"></div>
-
+ 
 <a href="../" class="back-btn">← TILBAKE</a>
-
+ 
 <div class="container">
   <div class="header">
     <h1>TYSK</h1>
     <p class="subtitle">Velg en oppgave nedenfor</p>
   </div>
-
   <div class="divider"></div>
-
-  <div class="task-list">
-    <a href="Tysk_skrivetrening_steg_for_steg_-_interaktive_oppgaver__med_KI-støtte.html" class="task-btn">
+  <div class="task-list" id="task-list"></div>
+</div>
+ 
+<script>
+// ── LEGG TIL OPPGAVER HER ──────────────────────────────
+const oppgaver = [
+  { num: "01", navn: "Skrivetrening steg for steg", desc: "", fil: "Tysk_skrivetrening_steg_for_steg_-_interaktive_oppgaver__med_KI-støtte.html" },
+  // { num: "02", navn: "Neste oppgave", desc: "Valgfri beskrivelse", fil: "neste.html" },
+];
+// ──────────────────────────────────────────────────────
+ 
+const list = document.getElementById('task-list');
+oppgaver.forEach(o => {
+  list.innerHTML += `
+    <a href="${o.fil}" class="task-btn">
       <div class="task-btn-left">
-        <span class="task-num">01</span>
-        <span class="task-name">Skrivetrening steg for steg</span>
+        <span class="task-num">${o.num}</span>
+        <div class="task-info">
+          <span class="task-name">${o.navn}</span>
+          ${o.desc ? `<span class="task-desc">${o.desc}</span>` : ''}
+        </div>
       </div>
       <span class="task-arrow">→</span>
-    </a>
-  </div>
-</div>
-
+    </a>`;
+});
+</script>
+ 
 </body>
 </html>
+ 
