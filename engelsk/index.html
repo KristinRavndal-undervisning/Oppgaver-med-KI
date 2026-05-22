@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engelsk — Oppgaver med KI-støtte</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --panel: #0f1525;
+    --border: #1e3a5f;
+    --glow-blue: #00d4ff;
+    --glow-green: #00ff88;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+ 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+  body {
+    background: var(--bg);
+    font-family: 'Exo 2', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+ 
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+    z-index: 0;
+  }
+ 
+  @keyframes gridMove {
+    from { transform: translateY(0); }
+    to { transform: translateY(60px); }
+  }
+ 
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+    pointer-events: none;
+    z-index: 1;
+  }
+ 
+  .corner { position: fixed; width: 60px; height: 60px; z-index: 3; }
+  .corner--tl { top: 20px; left: 20px; border-top: 2px solid var(--glow-blue); border-left: 2px solid var(--glow-blue); }
+  .corner--tr { top: 20px; right: 20px; border-top: 2px solid var(--glow-blue); border-right: 2px solid var(--glow-blue); }
+  .corner--bl { bottom: 20px; left: 20px; border-bottom: 2px solid var(--glow-blue); border-left: 2px solid var(--glow-blue); }
+  .corner--br { bottom: 20px; right: 20px; border-bottom: 2px solid var(--glow-blue); border-right: 2px solid var(--glow-blue); }
+ 
+  .container {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+ 
+  .back-btn {
+    position: fixed;
+    top: 28px;
+    left: 90px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    z-index: 4;
+  }
+  .back-btn:hover { color: var(--glow-blue); border-color: var(--glow-blue); }
+ 
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeDown 0.8s ease both;
+  }
+ 
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 900;
+    color: var(--glow-blue);
+    text-shadow: 0 0 30px rgba(0,212,255,0.6), 0 0 60px rgba(0,212,255,0.3);
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+ 
+  .subtitle { font-size: 0.9rem; color: var(--muted); font-weight: 300; }
+ 
+  .divider {
+    width: 100%;
+    max-width: 560px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin-bottom: 36px;
+  }
+ 
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 560px;
+    animation: fadeUp 0.8s 0.3s ease both;
+    opacity: 0;
+  }
+ 
+  .task-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 24px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.25s;
+  }
+ 
+  .task-btn:hover {
+    border-color: var(--glow-blue);
+    box-shadow: 0 0 20px rgba(0,212,255,0.15);
+    transform: translateX(4px);
+  }
+ 
+  .task-btn-left { display: flex; align-items: center; gap: 16px; }
+ 
+  .task-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--glow-blue);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    padding: 4px 10px;
+    border-radius: 3px;
+    min-width: 44px;
+    text-align: center;
+  }
+ 
+  .task-info { display: flex; flex-direction: column; gap: 4px; }
+  .task-name { font-size: 0.95rem; font-weight: 600; }
+  .task-desc { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
+ 
+  .task-arrow { color: var(--muted); font-size: 1.1rem; transition: color 0.2s; }
+  .task-btn:hover .task-arrow { color: var(--glow-blue); }
+ 
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+ 
+<div class="corner corner--tl"></div>
+<div class="corner corner--tr"></div>
+<div class="corner corner--bl"></div>
+<div class="corner corner--br"></div>
+ 
+<a href="../" class="back-btn">← TILBAKE</a>
+ 
+<div class="container">
+  <div class="header">
+    <h1>ENGELSK</h1>
+    <p class="subtitle">Velg en oppgave nedenfor</p>
+  </div>
+  <div class="divider"></div>
+  <div class="task-list" id="task-list"></div>
+</div>
+ 
+<script>
+// ── LEGG TIL OPPGAVER HER ──────────────────────────────
+const oppgaver = [
+  // { num: "01", navn: "Navn på oppgave", desc: "Valgfri beskrivelse", fil: "filnavn.html" },
+];
+// ──────────────────────────────────────────────────────
+ 
+const list = document.getElementById('task-list');
+if (oppgaver.length === 0) {
+  list.innerHTML = '<div style="text-align:center; color: var(--muted); font-size:0.85rem; padding: 40px 0; font-family:\'Orbitron\',monospace; letter-spacing:0.1em;">KOMMER SNART</div>';
+} else {
+  oppgaver.forEach(o => {
+    list.innerHTML += `
+      <a href="${o.fil}" class="task-btn">
+        <div class="task-btn-left">
+          <span class="task-num">${o.num}</span>
+          <div class="task-info">
+            <span class="task-name">${o.navn}</span>
+            ${o.desc ? `<span class="task-desc">${o.desc}</span>` : ''}
+          </div>
+        </div>
+        <span class="task-arrow">→</span>
+      </a>`;
+  });
+}
+</script>
+ 
+</body>
+</html>
+ 
