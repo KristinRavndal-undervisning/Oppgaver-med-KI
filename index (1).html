@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oppgaver med KI-støtte</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --panel: #0f1525;
+    --border: #1e3a5f;
+    --glow-blue: #00d4ff;
+    --glow-green: #00ff88;
+    --glow-purple: #a855f7;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Exo 2', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes gridMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(60px); }
+  }
+
+  /* Scanline effect */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.05) 2px,
+      rgba(0,0,0,0.05) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .container {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+
+  /* Corner decorations */
+  .corner {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    z-index: 3;
+  }
+  .corner--tl { top: 20px; left: 20px; border-top: 2px solid var(--glow-blue); border-left: 2px solid var(--glow-blue); }
+  .corner--tr { top: 20px; right: 20px; border-top: 2px solid var(--glow-blue); border-right: 2px solid var(--glow-blue); }
+  .corner--bl { bottom: 20px; left: 20px; border-bottom: 2px solid var(--glow-blue); border-left: 2px solid var(--glow-blue); }
+  .corner--br { bottom: 20px; right: 20px; border-bottom: 2px solid var(--glow-blue); border-right: 2px solid var(--glow-blue); }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 16px;
+    animation: fadeDown 0.8s ease both;
+  }
+
+
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--glow-green);
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.3);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  h1 .line1 { color: var(--text); }
+  h1 .line2 {
+    color: var(--glow-blue);
+    text-shadow: 0 0 30px rgba(0,212,255,0.6), 0 0 60px rgba(0,212,255,0.3);
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 16px;
+    max-width: 420px;
+    line-height: 1.6;
+  }
+
+  .subtitle strong {
+    color: var(--glow-green);
+    font-weight: 600;
+  }
+
+  /* Password notice */
+  .pw-notice {
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(168,85,247,0.08);
+    border: 1px solid rgba(168,85,247,0.3);
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    color: #c084fc;
+    animation: fadeDown 0.8s 0.2s ease both;
+  }
+
+  .pw-notice::before {
+    content: '🔒';
+    font-size: 1rem;
+  }
+
+  /* Divider */
+  .divider {
+    width: 100%;
+    max-width: 500px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 36px 0;
+    animation: fadeIn 1s 0.3s ease both;
+    opacity: 0;
+  }
+
+  /* Subject buttons */
+  .subjects {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.4s ease both;
+    opacity: 0;
+  }
+
+  .subject-btn {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    color: var(--text);
+  }
+
+  .subject-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 12px;
+  }
+
+  .subject-btn--en::before {
+    background: radial-gradient(ellipse at 50% 100%, rgba(0,212,255,0.15), transparent 70%);
+  }
+
+  .subject-btn--de::before {
+    background: radial-gradient(ellipse at 50% 100%, rgba(0,255,136,0.15), transparent 70%);
+  }
+
+  .subject-btn:hover::before { opacity: 1; }
+
+  .subject-btn--en:hover {
+    border-color: var(--glow-blue);
+    box-shadow: 0 0 30px rgba(0,212,255,0.2), inset 0 0 30px rgba(0,212,255,0.05);
+    transform: translateY(-4px);
+  }
+
+  .subject-btn--de:hover {
+    border-color: var(--glow-green);
+    box-shadow: 0 0 30px rgba(0,255,136,0.2), inset 0 0 30px rgba(0,255,136,0.05);
+    transform: translateY(-4px);
+  }
+
+  .subject-icon {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .subject-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .subject-btn--en .subject-label { color: var(--glow-blue); }
+  .subject-btn--de .subject-label { color: var(--glow-green); }
+
+  .subject-sublabel {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Corner tag on button */
+  .subject-btn .tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  .subject-btn--en .tag {
+    color: var(--glow-blue);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.2);
+  }
+
+  .subject-btn--de .tag {
+    color: var(--glow-green);
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.2);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 48px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: #1e3a5f;
+    animation: fadeIn 1s 0.8s ease both;
+    opacity: 0;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Blinking cursor effect on title */
+  .cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background: var(--glow-blue);
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .subjects { gap: 16px; }
+    .subject-btn { width: 160px; height: 160px; }
+    .subject-icon { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="corner corner--tl"></div>
+<div class="corner corner--tr"></div>
+<div class="corner corner--bl"></div>
+<div class="corner corner--br"></div>
+
+<div class="container">
+  <div class="header">
+
+    <h1>
+      <div class="line1">OPPGAVER MED</div>
+      <div class="line2">KI-STØTTE<span class="cursor"></span></div>
+    </h1>
+    <p class="subtitle">
+      Interaktive språkoppgaver med kunstig intelligens.<br>
+      <strong>Disse oppgavene krever passord.</strong>
+    </p>
+    <div class="pw-notice">Passord får du av læreren din</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="subjects">
+    <a href="engelsk/" class="subject-btn subject-btn--en">
+
+      <div class="subject-icon"><svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg"><path d="M26 4 A22 22 0 1 1 25.999 4 Z" fill="#00d4ff"/><path d="M26 4 L48 16 A22 22 0 0 0 26 4 Z" fill="#0a0e1a"/><circle cx="26" cy="13" r="3" fill="#0a0e1a"/></svg></div>
+      <div class="subject-label">ENGELSK</div>
+      <div class="subject-sublabel">English exercises</div>
+    </a>
+    <a href="tysk/" class="subject-btn subject-btn--de">
+
+      <div class="subject-icon"><svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg"><path d="M26 4 A22 22 0 1 1 25.999 4 Z" fill="#00ff88"/><path d="M26 4 L48 16 A22 22 0 0 0 26 4 Z" fill="#0a0e1a"/><circle cx="26" cy="13" r="3" fill="#0a0e1a"/></svg></div>
+      <div class="subject-label">TYSK</div>
+      <div class="subject-sublabel">Deutsche Übungen</div>
+    </a>
+  </div>
+
+
+</div>
+
+</body>
+</html>
